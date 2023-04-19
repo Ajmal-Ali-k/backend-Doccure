@@ -129,6 +129,7 @@ const newDoctorDetails = async(req,res)=>{
     const newDoctor = await DoctorModel.findOne({id:req.body.id})
     if(newDoctor){
       res.status(200).send({success:true,newDoctor})
+      console.log(newDoctor)
     }
     else{
       return res.status(200).send({message:"doctor not found",success:false})
@@ -191,12 +192,14 @@ const addDepartment =async (req,res)=>{
 
 const getDepartments = async (req,res) =>{
   try {
+    console.log("hiiiiii")
     const departments = await DepartmentModel.find({})
     if(departments){
       res.status(200).send({
         departments,
         success:true
       })
+    
 
     }else{
       return res.status(200).send({

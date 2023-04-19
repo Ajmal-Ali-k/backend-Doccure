@@ -1,5 +1,5 @@
 const express = require('express');
-const { loginController, registerController, approvedDoctors } = require('../controllers/userController');
+const { loginController, registerController, approvedDoctors,getDepartments } = require('../controllers/userController');
 
 
 
@@ -12,5 +12,6 @@ const router = express.Router()
 router.post('/login',loginController)
 router.post('/signup',registerController)
 router.post('/approved',approvedDoctors)
+router.get('/departments',getDepartments)
 
 module.exports = router

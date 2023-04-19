@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 var validator = require('validator');
 const jwt = require("jsonwebtoken");
 const doctorModel = require("../models/doctorModel");
+const DepartmentModel =require('../models/departmentModel')
 
 
 const loginController = async(req,res) => {
@@ -124,10 +125,36 @@ const approvedDoctors = async (req,res) =>{
     }
 }
 
-
+const getDepartments = async (req,res) =>{
+    try {
+        console.log("hiihsddfu")
+      const departments = await DepartmentModel.find({})
+      if(departments){
+        res.status(200).send({
+          departments,
+          success:true
+        })
+  
+      }else{
+        return res.status(200).send({
+          message:'no department find',
+          success:false
+        })
+      }
+      
+    } catch (error) {
+      console.log(error)
+      res.status(500).send({
+        message:`get department controller ${error}`,
+        success:false
+      })
+      
+    }
+  }
 
 module.exports = {
     loginController,
     registerController,
-    approvedDoctors
+    approvedDoctors,
+    getDepartments
 }
