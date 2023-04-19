@@ -1,0 +1,128 @@
+const DoctorModel = require("../models/doctorModel");
+const bcrypt = require("bcryptjs");
+const  validator = require("validator");
+const cloudinary = require('cloudinary').v2;
+const {CloudinaryConfig} =require('../utilities/cloudinary')
+
+
+
+
+
+const DoctorSignup = async (req, res) => {
+
+  try {
+    const {
+      name,
+      number,
+      email,
+      address,
+      specialization,
+      certificate,
+      photo,
+      expirience,
+      password,
+      confirmpassword
+
+    
+    } = req.body.data
+
+  
+    if (
+      name &&
+      number &&
+      email &&
+      address &&
+      specialization &&
+      certificate &&
+      photo &&
+      expirience &&
+      password &&
+      confirmpassword 
+
+    ) {
+
+      if (!validator.isEmail(email)) {
+        return res.status(200).send({
+          message: "email is not valid",
+          success: false,
+        });
+      }
+      if (!validator.isStrongPassword(password)) {
+        return res.status(200).send({
+          message: "password is not strong",
+          success: false,
+        });
+      }
+      if (!validator.isMobilePhone(number, "en-IN")) {
+        return res
+          .status(200)
+          .send({ message: "Phone Number is not Valid", success: false });
+      }
+      const existDoc = await DoctorModel.findOne({ email: email });
+      if (existDoc) {
+        if (existDoc.status === "rejected") {
+          return res.status(200).send({
+            message: "this account is already rejected",
+            success: false,
+          });
+        }
+        return res.status(200).send({
+          message: "doctor already exist",
+          success: false,
+        });
+      }
+      if (password != confirmpassword) {
+        return res.status(200).send({
+          message: "password is not match",
+          success: false,
+        });
+      }
+      const finalimage = await cloudinary.uploader.upload(certificate,{
+        folder:"Certificate"
+      }).catch((err)=>{
+        console.log(err,"this is cloudinary error")
+      })
+      const profile = await cloudinary.uploader.upload(photo,{
+        folder:"Doctor_profile"
+      }).catch((err)=>{
+        console.log(err,'doctor profile upload cloudinary ')
+      })
+      console.log(finalimage,"this is cloudinary image")
+      const salt = await bcrypt.genSaltSync(10);
+      const hashedPassword = await bcrypt.hash(password.trim(), salt);
+      const newDoctor = DoctorModel({
+        name,
+        number,
+        email,
+        address,
+        specialization,
+        expirience,
+        certificate:finalimage.secure_url,
+        photo:profile.secure_url,
+        password: hashedPassword,
+        status: "pending",
+      });
+      await newDoctor.save();
+
+      return res.status(200).send({
+        message: "signup success fully compleated ",
+        success: true,
+      });
+    } else {
+      return res.status(200).send({
+        message: "All field must be filled",
+        success: false,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `Error in Doctor signup controller ${error.message}`,
+    });
+  }
+};
+
+module.exports = {
+  DoctorSignup,
+};
