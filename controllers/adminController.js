@@ -125,8 +125,11 @@ const rejectDocter = async(req,res) =>{
 }
 
 const newDoctorDetails = async(req,res)=>{
+  console.log(req.query.id)
+  const id= req.query.id
+ 
   try {
-    const newDoctor = await DoctorModel.findOne({id:req.body.id})
+    const newDoctor = await DoctorModel.findOne({_id:id})
     if(newDoctor){
       res.status(200).send({success:true,newDoctor})
       console.log(newDoctor)
