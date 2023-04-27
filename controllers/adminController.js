@@ -28,7 +28,7 @@ const adminLogin = async (req, res) => {
           .status(200)
           .send({ message: "invalid email or password", success: false });
       }
-      const adminToken = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, {
+      const adminToken = jwt.sign({ role:"adminLogin",id: admin._id }, process.env.JWT_SECRET, {
         expiresIn: 60 * 60 * 24,
       });
       const adminemail = admin.email;

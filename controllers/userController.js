@@ -24,7 +24,7 @@ const loginController = async(req,res) => {
             if(!isMatch){
                 return res.status(200).send({message:"invalid email or password",success:false})
             }
-            const clientToken = jwt.sign({id:user._id},process.env.JWT_SECRET,{
+            const clientToken = jwt.sign({role:"clientLogin",id:user._id},process.env.JWT_SECRET,{
                 expiresIn :60 *60 *24,
             })
             console.log(user,"this is the user")
@@ -151,6 +151,8 @@ const getDepartments = async (req,res) =>{
       
     }
   }
+
+
 
 module.exports = {
     loginController,
