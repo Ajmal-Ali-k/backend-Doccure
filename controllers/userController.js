@@ -152,11 +152,16 @@ const getDepartments = async (req,res) =>{
     }
   }
 
+  const filteredDoctors = async (req,res)=>{
+    console.log(req.body.data,"this is the checked data")
+
+  }
 
 
 module.exports = {
     loginController,
     registerController,
     approvedDoctors,
-    getDepartments
+    getDepartments,
+    filteredDoctors
 }

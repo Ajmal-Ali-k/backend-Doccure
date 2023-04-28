@@ -3,7 +3,7 @@ const  jwt = require("jsonwebtoken");
  const clientVerify = async (req, res, next) => {
     let token = req.header("Authorization");
 
-    console.log(token, "token------");
+
 
     try {
         if (!token) return res.status(404).json({ message: "Authentication failed: no token provided." });
@@ -37,7 +37,7 @@ const adminVerify = async (req, res, next) => {
 
         if (token.startsWith("Bearer")) {
             token = token.slice(6, token.length).trimLeft();
-            console.log("thshgsd",token,"this is trim ed token")
+  
 
         }
     
