@@ -40,6 +40,10 @@ const doctorSchema = new mongoose.Schema({
     status:{
         type:String,
     
+    },
+    block:{
+        type:Boolean,
+        default:false
     }
 },{timestamps:true});
 

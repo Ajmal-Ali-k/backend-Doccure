@@ -2,10 +2,12 @@ require("dotenv/config");
 const DoctorModel = require("../models/doctorModel");
 const bcrypt = require("bcryptjs");
 const AdminModel = require("../models/adminModel");
+const UserModel = require('../models/userModel')
 const jwt = require("jsonwebtoken");
 const DepartmentModel = require("../models/departmentModel");
 const cloudinary = require('cloudinary').v2;
-const {CloudinaryConfig} =require('../utilities/cloudinary')
+const {CloudinaryConfig} =require('../utilities/cloudinary');
+
 
 
 
@@ -242,6 +244,43 @@ const deleteDepartment = async (req,res) =>{
   }
 }
 
+const userList = async (req,res)=>{
+  try {
+    const Users = await UserModel.find({})
+    console.log(Users)
+    res.status(200).send({
+      success:true,
+      Users
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      message:`Userlist department controller ${error}`,
+      success:false
+    })
+  }
+}
+
+const doctorList = async (req,res)=>{
+  try {
+    const Doctors = await DoctorModel.aggregate([
+      {
+        $match: { status: "approved" },
+      },
+    ])
+    res.status(200).send({
+      success:true,
+      Doctors
+    })
+    
+  } catch (error) {
+    res.status(500).send({
+      message:`doctor list controller ${error}`,
+      success:false
+    })
+  }
+}
+
 module.exports = {
   getPendingDoctors,
   adminLogin,
@@ -250,6 +289,8 @@ module.exports = {
   addDepartment,
   getDepartments,
   newDoctorDetails,
-  deleteDepartment
+  deleteDepartment,
+  userList,
+  doctorList
 
 };
