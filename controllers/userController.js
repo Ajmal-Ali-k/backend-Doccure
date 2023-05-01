@@ -156,6 +156,28 @@ const getDepartments = async (req,res) =>{
     console.log(req.body.data,"this is the checked data")
 
   }
+  const doctorDetails = async(req,res)=>{
+    console.log(req.query.id)
+    const id= req.query.id
+   
+    try {
+      const Doctor = await doctorModel.findOne({_id:id})
+      if(Doctor){
+        res.status(200).send({success:true,Doctor})
+        console.log(Doctor)
+      }
+      else{
+        return res.status(200).send({message:"doctor not found",success:false})
+      }
+    } catch (error) {
+      console.log(error)
+      res.status(500).send({
+        message:`new doctor details error ${error}`,
+        success:false
+      })
+      
+    }
+  }
 
 
 module.exports = {
@@ -163,5 +185,6 @@ module.exports = {
     registerController,
     approvedDoctors,
     getDepartments,
-    filteredDoctors
+    filteredDoctors,
+    doctorDetails
 }

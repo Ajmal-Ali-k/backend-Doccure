@@ -1,5 +1,5 @@
 const express = require('express');
-const { loginController, registerController, approvedDoctors,getDepartments,filteredDoctors } = require('../controllers/userController');
+const { loginController, registerController, approvedDoctors,getDepartments,filteredDoctors,doctorDetails } = require('../controllers/userController');
 
 const {clientVerify}= require('../middleware/authentication')
 
@@ -16,5 +16,5 @@ router.post('/signup',registerController)
 router.get('/departments',getDepartments)
 router.get('/Doctors',clientVerify,approvedDoctors)
 router.post('/filteredDoctors',clientVerify,filteredDoctors)
-
+router.get('/doctorDetail',clientVerify,doctorDetails)
 module.exports = router

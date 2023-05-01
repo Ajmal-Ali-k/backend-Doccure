@@ -1,87 +1,98 @@
-const  jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
- const clientVerify = async (req, res, next) => {
-    let token = req.header("Authorization");
+const clientVerify = async (req, res, next) => {
+  let token = req.header("Authorization");
 
+  try {
+    if (!token)
+      return res
+        .status(404)
+        .json({ message: "Authentication failed: no token provided." });
 
-
-    try {
-        if (!token) return res.status(404).json({ message: "Authentication failed: no token provided." });
-
-        if (token.startsWith("Bearer")) {
-            token = token.slice(6, token.length).trimLeft();
-        }
-
-        const verified = await jwt.verify(token, process.env.JWT_SECRET);
-
-        req.user = verified;
-
-        if (verified.role === "clientLogin") {
-            next();
-        } else {
-            res.status(404).json({ message: "Authentication failed: invalid token." });
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(404).json({ message: "Authentication failed: invalid token." });
+    if (token.startsWith("Bearer")) {
+      token = token.slice(6, token.length).trimLeft();
     }
+
+    const verified = await jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = verified;
+
+    if (verified.role === "clientLogin") {
+      next();
+    } else {
+      res
+        .status(404)
+        .json({ message: "Authentication failed: invalid token." });
+    }
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(404)
+      .json({ message: "Authentication failed: invalid token." });
+  }
 };
 
 const adminVerify = async (req, res, next) => {
-    let token = req.header("Authorization");
+  let token = req.header("Authorization");
 
+  try {
+    if (!token)
+      return res
+        .status(404)
+        .json({ message: "Authentication failed: no token provided." });
 
-
-    try {
-        if (!token) return res.status(404).json({ message: "Authentication failed: no token provided." });
-
-        if (token.startsWith("Bearer")) {
-            token = token.slice(6, token.length).trimLeft();
-  
-
-        }
-    
-
-        const verified =  jwt.verify(token, process.env.JWT_SECRET);
-        req.user = verified;
-
-        if (verified.role === "adminLogin") {
-          
-            next();
-        } else {
-            res.status(404).json({ message: "Authentication failed: invalid token." });
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(404).json({ message: "Authentication failed: invalid token." });
+    if (token.startsWith("Bearer")) {
+      token = token.slice(6, token.length).trimLeft();
     }
+
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = verified;
+
+    if (verified.role === "adminLogin") {
+      next();
+    } else {
+      res
+        .status(404)
+        .json({ message: "Authentication failed: invalid token." });
+    }
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(404)
+      .json({ message: "Authentication failed: invalid token." });
+  }
 };
 
- const doctotVerify = async (req, res, next) => {
-    let token = req.header("Authorization");
+const doctotVerify = async (req, res, next) => {
+  let token = req.header("Authorization");
 
+  try {
+    if (!token)
+      return res
+        .status(404)
+        .json({ message: "Authentication failed: no token provided." });
 
-
-    try {
-        if (!token) return res.status(404).json({ message: "Authentication failed: no token provided." });
-
-        if (token.startsWith("Bearer")) {
-            token = token.slice(6, token.length).trimLeft();
-        }
-
-        const verified =  jwt.verify(token, process.env.JWT_SECRET);
-
-        req.user = verified;
-
-        if (verified.role === "turfAdminLogin") {
-            next();
-        } else {
-            res.status(404).json({ message: "Authentication failed: invalid token." });
-        }
-    } catch (error) {
-        console.log(error);
-        return res.status(404).json({ message: "Authentication failed: invalid token." });
+    if (token.startsWith("Bearer")) {
+      token = token.slice(6, token.length).trimLeft();
     }
+
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = verified;
+
+    if (verified.role === "turfAdminLogin") {
+      next();
+    } else {
+      res
+        .status(404)
+        .json({ message: "Authentication failed: invalid token." });
+    }
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(404)
+      .json({ message: "Authentication failed: invalid token." });
+  }
 };
 
 // export const generateToken = (data) => {
@@ -89,4 +100,4 @@ const adminVerify = async (req, res, next) => {
 //     return token;
 // };
 
-module.exports ={clientVerify,adminVerify,doctotVerify}
+module.exports = { clientVerify, adminVerify, doctotVerify };
