@@ -247,7 +247,7 @@ const deleteDepartment = async (req,res) =>{
 const userList = async (req,res)=>{
   try {
     const Users = await UserModel.find({})
-    console.log(Users)
+
     res.status(200).send({
       success:true,
       Users
@@ -281,6 +281,53 @@ const doctorList = async (req,res)=>{
   }
 }
 
+const blockUser = async (req,res)=>{
+  const Id = req.body.id
+  console.log(Id)
+  try {
+    const user = await UserModel.findByIdAndUpdate(Id,{
+      block:true
+    })
+
+    if(user){
+      res.status(200).send({
+        
+        success:true
+      })
+    }
+    
+  } catch (error) {
+    res.status(500).send({
+      message:`block use controller ${error}`,
+      success:false
+    })
+  }
+}
+
+const UnblockUser = async (req,res)=>{
+  const Id = req.body.id
+  console.log(Id)
+  try {
+    const user = await UserModel.findByIdAndUpdate(Id,{
+      block:false
+    })
+ 
+    if(user){
+      res.status(200).send({
+        success:true
+      })
+    }
+
+    
+  } catch (error) {
+    res.status(500).send({
+      message:`block use controller ${error}`,
+      success:false
+    })
+  }
+}
+
+
 module.exports = {
   getPendingDoctors,
   adminLogin,
@@ -291,6 +338,8 @@ module.exports = {
   newDoctorDetails,
   deleteDepartment,
   userList,
-  doctorList
+  doctorList,
+  blockUser,
+  UnblockUser
 
 };
