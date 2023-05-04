@@ -1,51 +1,83 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
-const doctorSchema = new mongoose.Schema({
+const daySchema = new mongoose.Schema({
+  day: {
+    type: String,
+    trim: true,
+  },
+
+  status: {
+    type: String,
+    trim: true,
+    default: "active",
+  },
+  time: [
+    {
+      start: {
+        type: Date,
+        trim: true,
+      },
+      end: {
+        type: Date,
+        trim: true,
+      },
+      slots: {
+        type: Number,
+        trim: true,
+      },
+    },
+  ],
+});
+
+const doctorSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: [true, "name is required"],
+      type: String,
+      required: [true, "name is required"],
     },
     number: {
-        type: Number,
-        required: [true, "number is required"],
+      type: Number,
+      required: [true, "number is required"],
     },
     email: {
-        type: String,
-        required: [true, "email is required"],
+      type: String,
+      required: [true, "email is required"],
     },
     address: {
-        type: String,
-        required: [true, "address is required"],
+      type: String,
+      required: [true, "address is required"],
     },
     specialization: {
-        type: String,
-        required: [true, "specialisation is required"],
+      type: String,
+      required: [true, "specialisation is required"],
     },
     expirience: {
-        type: String,
-        required: [true, "expirience is required"],
+      type: String,
+      required: [true, "expirience is required"],
     },
     certificate: {
-        type: String,
-        required: [true, "certificate is required"],
+      type: String,
+      required: [true, "certificate is required"],
     },
-    photo:{
-        type:String,
-        required:[true,"photo is required"]
+    photo: {
+      type: String,
+      required: [true, "photo is required"],
     },
     password: {
-        type: String,
-        required: [true, "password is required"],
+      type: String,
+      required: [true, "password is required"],
     },
-    status:{
-        type:String,
-    
+    status: {
+      type: String,
     },
-    block:{
-        type:Boolean,
-        default:false
-    }
-},{timestamps:true});
+    availability: [daySchema],
+    block: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { timestamps: true }
+);
 
 const doctorModel = mongoose.model("doctors", doctorSchema);
 module.exports = doctorModel;

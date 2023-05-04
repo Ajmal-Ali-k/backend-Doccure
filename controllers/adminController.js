@@ -31,7 +31,7 @@ const adminLogin = async (req, res) => {
           .send({ message: "invalid email or password", success: false });
       }
       const adminToken = jwt.sign({ role:"adminLogin",id: admin._id }, process.env.JWT_SECRET, {
-        expiresIn: 60 * 60 * 24,
+        expiresIn: 60 * 60 * 24 *3,
       });
       const adminemail = admin.email;
       res.status(200).send({
@@ -328,6 +328,52 @@ const UnblockUser = async (req,res)=>{
 }
 
 
+const blockDoctor = async (req,res)=>{
+  const Id = req.body.id
+  console.log(Id)
+  try {
+    const doctor = await DoctorModel.findByIdAndUpdate(Id,{
+      block:true
+    })
+
+    if(doctor){
+      res.status(200).send({
+        
+        success:true
+      })
+    }
+    
+  } catch (error) {
+    res.status(500).send({
+      message:`block use controller ${error}`,
+      success:false
+    })
+  }
+}
+const UnblockDoctor = async (req,res)=>{
+  const Id = req.body.id
+  console.log(Id)
+  try {
+    const doctor = await DoctorModel.findByIdAndUpdate(Id,{
+      block:false
+    })
+
+    if(doctor){
+      res.status(200).send({
+        
+        success:true
+      })
+    }
+    
+  } catch (error) {
+    res.status(500).send({
+      message:`block use controller ${error}`,
+      success:false
+    })
+  }
+}
+
+
 module.exports = {
   getPendingDoctors,
   adminLogin,
@@ -340,6 +386,8 @@ module.exports = {
   userList,
   doctorList,
   blockUser,
-  UnblockUser
+  UnblockUser,
+  blockDoctor,
+  UnblockDoctor
 
 };

@@ -1,8 +1,10 @@
+require("dotenv/config");
 const DoctorModel = require("../models/doctorModel");
 const bcrypt = require("bcryptjs");
 const  validator = require("validator");
 const cloudinary = require('cloudinary').v2;
 const {CloudinaryConfig} =require('../utilities/cloudinary')
+const jwt = require("jsonwebtoken")
 
 
 
@@ -122,7 +124,53 @@ const DoctorSignup = async (req, res) => {
     });
   }
 };
+const DoctorLogin = async (req,res)=>{
+  try {
+    console.log(req.body.data)
+    const {email,password} = req.body.data
+    if (email && password) {
+      const doctor = await DoctorModel.findOne({ email });
+      if (!doctor) {
+        return res
+          .status(200)
+          .send({ message: "Doctor not found", success: false });
+      }
+      const isMatch = await bcrypt.compare(password, doctor.password);
+      if (!isMatch) {
+        return res
+          .status(200)
+          .send({ message: "invalid email or password", success: false });
+      }
+      const doctorToken = jwt.sign({ role:"doctorLogin",id: doctor._id }, process.env.JWT_SECRET, {
+        expiresIn: 60 * 60 * 24 *3,
+      });
+      const doctorName = doctor.name;
+      res.status(200).send({
+        message: "login success",
+        success: true,
+        doctorName,
+        doctorToken
+      });
+    } else {
+      return res
+        .status(200)
+        .send({ message: "All field must be filles", success: false });
+    }
+    
+    
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      success:false,
+      message:`Doctor login controller ${error.message}`
+    })
+    
+  }
+}
+
+
 
 module.exports = {
   DoctorSignup,
+  DoctorLogin
 };

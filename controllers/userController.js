@@ -25,7 +25,7 @@ const loginController = async(req,res) => {
                 return res.status(200).send({message:"invalid email or password",success:false})
             }
             const clientToken = jwt.sign({role:"clientLogin",id:user._id},process.env.JWT_SECRET,{
-                expiresIn :60 *60 *24,
+                expiresIn :60 *60 *24 * 3,
             })
             console.log(user,"this is the user")
             const clientName = user.username;
