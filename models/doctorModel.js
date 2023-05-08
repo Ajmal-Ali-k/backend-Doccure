@@ -1,33 +1,33 @@
 const mongoose = require("mongoose");
 
-const daySchema = new mongoose.Schema({
-  day: {
-    type: String,
-    trim: true,
-  },
+// const daySchema = new mongoose.Schema({
+//   day: {
+//     type: String,
+//     trim: true,
+//   },
 
-  status: {
-    type: String,
-    trim: true,
-    default: "active",
-  },
-  time: [
-    {
-      start: {
-        type: Date,
-        trim: true,
-      },
-      end: {
-        type: Date,
-        trim: true,
-      },
-      slots: {
-        type: Number,
-        trim: true,
-      },
-    },
-  ],
-});
+//   status: {
+//     type: String,
+//     trim: true,
+//     default: "active",
+//   },
+//   time: [
+//     {
+//       start: {
+//         type: Date,
+//         trim: true,
+//       },
+//       end: {
+//         type: Date,
+//         trim: true,
+//       },
+//       slots: {
+//         type: Number,
+//         trim: true,
+//       },
+//     },
+//   ],
+// });
 
 const doctorSchema = new mongoose.Schema(
   {
@@ -70,7 +70,24 @@ const doctorSchema = new mongoose.Schema(
     status: {
       type: String,
     },
-    availability: [daySchema],
+    // availability: [daySchema],
+    slots:[
+      {
+        date:{
+          type:Date
+        },
+        startTime :{
+          type:String
+        },
+        endTime:{
+          type:String
+        },
+        status:{
+          type:String,
+          default:"active"
+        }
+      }
+    ],
     block: {
       type: Boolean,
       default: false,

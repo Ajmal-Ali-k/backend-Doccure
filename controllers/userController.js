@@ -180,11 +180,79 @@ const getDepartments = async (req,res) =>{
   }
 
 
+  const updateProfile = async(req,res )=>{
+    try {
+      console.log(req.body.data)
+      const {username,lastName,photo,number,dateOfBirth,bloodGroup,email,address,city,state,zipCode,country} =req.body.data
+      const Id = req.user.id
+      console.log(email)
+      const {data}  = req.body
+      const user = await userModel.findByIdAndUpdate({_id:Id},{
+       username,lastName,photo,number,dateOfBirth,bloodGroup,email,address,city,state,zipCode,country
+       
+      })
+   
+      res.status(200).send({
+        message:`profile updated Successfully`,
+        success:true
+      })
+    } catch (error) {
+      console.log(error)
+      res.status(500).send({
+        message:`update profile controller ${error.message}`,
+        success:false
+      })
+    }
+  }
+ 
+
+  const getUserData = async (req,res)=>{
+    try {
+     const Id =req.user.id
+      const user =await userModel.findOne({_id:Id})
+      if(user){
+
+        return res.status(200).send({
+          success:true,
+          user
+        })
+      }else{
+        return res.status(500).send({
+          success:true,
+         message:`something went wrong${error.message}`
+        })
+      }
+      
+    } catch (error) {
+      console.log(error)
+      res.status(500).send({
+        messge:`get usercontroller${error.message}`
+      })
+    }
+
+  }
+
+
+  const changePassword =async (req,res)=>{
+    try {
+console.log(req.body)
+      
+    } catch (error) {
+      console.log(error)
+      res.status(500).send({
+        message:`chnge password controller${error.message}`
+      })
+    }
+
+  }
 module.exports = {
     loginController,
     registerController,
     approvedDoctors,
     getDepartments,
     filteredDoctors,
-    doctorDetails
+    doctorDetails,
+    updateProfile,
+    getUserData,
+    changePassword
 }

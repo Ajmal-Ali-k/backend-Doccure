@@ -6,6 +6,19 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:[true,'name is required']
     },
+    lastName:{
+        type:String
+
+    },
+    dateOfBirth:{
+        type:String,
+    },
+    bloodGroup:{
+        type:String,
+    },
+    photo:{
+        type:String
+    },
     age:{
         type:Number,
         required:[true,'age is required']
@@ -25,6 +38,19 @@ const userSchema = new mongoose.Schema({
     address:{
         type:String,
         required:[true ,'address is required']
+    },
+    city:{
+        type:String,
+
+    },
+    state:{
+        type:String
+    },
+    zipCode:{
+        type:String
+    },
+    country:{
+        type:String
     },
     password:{
         type:String,

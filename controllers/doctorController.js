@@ -4,7 +4,8 @@ const bcrypt = require("bcryptjs");
 const  validator = require("validator");
 const cloudinary = require('cloudinary').v2;
 const {CloudinaryConfig} =require('../utilities/cloudinary')
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+
 
 
 
@@ -168,9 +169,52 @@ const DoctorLogin = async (req,res)=>{
   }
 }
 
+const createSlot = async(req,res)=>{
+  try {
 
+   
+
+    const Id = req.doctor.id
+    const {data} =req.body
+    console.log(data)
+    if(data){
+     await DoctorModel.findByIdAndUpdate({_id:Id},{$push:{slots:data}})
+     return res.status(200).send({
+      success:true,
+      message:'Slot added Succesfully'
+     })
+    }
+    console.log("slot added")
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      success:false,message:`create Slot controller ${error.message}`
+    })
+  }
+}
+
+const get_slot = async(req,res)=>{
+
+  try {
+    const Id = req.doctor.id
+    await DoctorModel.findOne({_id:Id}).then((data)=>{
+      const result = data.slots
+      console.log(result)
+      res.status(200).send({
+        success:true,result
+      })
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      success:false,message:`get slot controller ${error.message}`
+    })
+  }
+}
 
 module.exports = {
   DoctorSignup,
-  DoctorLogin
+  DoctorLogin,
+  createSlot,
+  get_slot
 };

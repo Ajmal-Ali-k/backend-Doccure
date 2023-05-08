@@ -46,7 +46,7 @@ const adminVerify = async (req, res, next) => {
     }
 
     const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+    req.admin = verified;
 
     if (verified.role === "adminLogin") {
       next();
@@ -63,7 +63,7 @@ const adminVerify = async (req, res, next) => {
   }
 };
 
-const doctotVerify = async (req, res, next) => {
+const doctorVerify = async (req, res, next) => {
   let token = req.header("Authorization");
 
   try {
@@ -78,9 +78,10 @@ const doctotVerify = async (req, res, next) => {
 
     const verified = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = verified;
+    req.doctor = verified;
+   
 
-    if (verified.role === "turfAdminLogin") {
+    if (verified.role === "doctorLogin") {
       next();
     } else {
       res
@@ -100,4 +101,4 @@ const doctotVerify = async (req, res, next) => {
 //     return token;
 // };
 
-module.exports = { clientVerify, adminVerify, doctotVerify };
+module.exports = { clientVerify, adminVerify, doctorVerify };
