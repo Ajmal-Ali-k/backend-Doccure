@@ -55,6 +55,10 @@ const doctorSchema = new mongoose.Schema(
       type: String,
       required: [true, "expirience is required"],
     },
+    fee:{
+      type:String,
+      required:[true,"fee is required"]
+    },
     certificate: {
       type: String,
       required: [true, "certificate is required"],
@@ -74,7 +78,7 @@ const doctorSchema = new mongoose.Schema(
     slots:[
       {
         date:{
-          type:Date
+          type:String
         },
         startTime :{
           type:String

@@ -1,49 +1,40 @@
 require("dotenv/config");
 const DoctorModel = require("../models/doctorModel");
 const bcrypt = require("bcryptjs");
-const  validator = require("validator");
-const cloudinary = require('cloudinary').v2;
-const {CloudinaryConfig} =require('../utilities/cloudinary')
+const validator = require("validator");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryConfig } = require("../utilities/cloudinary");
 const jwt = require("jsonwebtoken");
 
-
-
-
-
-
 const DoctorSignup = async (req, res) => {
-
   try {
     const {
       name,
       number,
       email,
       address,
+      fee,
       specialization,
       certificate,
       photo,
       expirience,
       password,
-      confirmpassword
+      confirmpassword,
+    } = req.body.data;
 
-    
-    } = req.body.data
-
-  
     if (
       name &&
       number &&
       email &&
       address &&
+      fee &&
       specialization &&
       certificate &&
       photo &&
       expirience &&
       password &&
-      confirmpassword 
-
+      confirmpassword
     ) {
-
       if (!validator.isEmail(email)) {
         return res.status(200).send({
           message: "email is not valid",
@@ -80,17 +71,21 @@ const DoctorSignup = async (req, res) => {
           success: false,
         });
       }
-      const finalimage = await cloudinary.uploader.upload(certificate,{
-        folder:"Certificate"
-      }).catch((err)=>{
-        console.log(err,"this is cloudinary error")
-      })
-      const profile = await cloudinary.uploader.upload(photo,{
-        folder:"Doctor_profile"
-      }).catch((err)=>{
-        console.log(err,'doctor profile upload cloudinary ')
-      })
-      console.log(finalimage,"this is cloudinary image")
+      const finalimage = await cloudinary.uploader
+        .upload(certificate, {
+          folder: "Certificate",
+        })
+        .catch((err) => {
+          console.log(err, "this is cloudinary error");
+        });
+      const profile = await cloudinary.uploader
+        .upload(photo, {
+          folder: "Doctor_profile",
+        })
+        .catch((err) => {
+          console.log(err, "doctor profile upload cloudinary ");
+        });
+      console.log(finalimage, "this is cloudinary image");
       const salt = await bcrypt.genSaltSync(10);
       const hashedPassword = await bcrypt.hash(password.trim(), salt);
       const newDoctor = DoctorModel({
@@ -100,8 +95,9 @@ const DoctorSignup = async (req, res) => {
         address,
         specialization,
         expirience,
-        certificate:finalimage.secure_url,
-        photo:profile.secure_url,
+        fee,
+        certificate: finalimage.secure_url,
+        photo: profile.secure_url,
         password: hashedPassword,
         status: "pending",
       });
@@ -125,10 +121,10 @@ const DoctorSignup = async (req, res) => {
     });
   }
 };
-const DoctorLogin = async (req,res)=>{
+const DoctorLogin = async (req, res) => {
   try {
-    console.log(req.body.data)
-    const {email,password} = req.body.data
+    console.log(req.body.data);
+    const { email, password } = req.body.data;
     if (email && password) {
       const doctor = await DoctorModel.findOne({ email });
       if (!doctor) {
@@ -142,79 +138,82 @@ const DoctorLogin = async (req,res)=>{
           .status(200)
           .send({ message: "invalid email or password", success: false });
       }
-      const doctorToken = jwt.sign({ role:"doctorLogin",id: doctor._id }, process.env.JWT_SECRET, {
-        expiresIn: 60 * 60 * 24 *3,
-      });
+      const doctorToken = jwt.sign(
+        { role: "doctorLogin", id: doctor._id },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: 60 * 60 * 24 * 3,
+        }
+      );
       const doctorName = doctor.name;
       res.status(200).send({
         message: "login success",
         success: true,
         doctorName,
-        doctorToken
+        doctorToken,
       });
     } else {
       return res
         .status(200)
         .send({ message: "All field must be filles", success: false });
     }
-    
-    
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
-      success:false,
-      message:`Doctor login controller ${error.message}`
-    })
-    
+      success: false,
+      message: `Doctor login controller ${error.message}`,
+    });
   }
-}
+};
 
-const createSlot = async(req,res)=>{
+const createSlot = async (req, res) => {
   try {
-
-   
-
-    const Id = req.doctor.id
-    const {data} =req.body
-    console.log(data)
-    if(data){
-     await DoctorModel.findByIdAndUpdate({_id:Id},{$push:{slots:data}})
-     return res.status(200).send({
-      success:true,
-      message:'Slot added Succesfully'
-     })
+    const Id = req.doctor.id;
+    const { data } = req.body;
+    console.log(data, "this is dateaaa");
+    if (data) {
+      await DoctorModel.findByIdAndUpdate(
+        { _id: Id },
+        { $push: { slots: data } }
+      );
+      return res.status(200).send({
+        success: true,
+        message: "Slot added Succesfully",
+      });
     }
-    console.log("slot added")
+    console.log("slot added");
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
-      success:false,message:`create Slot controller ${error.message}`
-    })
+      success: false,
+      message: `create Slot controller ${error.message}`,
+    });
   }
-}
+};
 
-const get_slot = async(req,res)=>{
-
+const get_slot = async (req, res) => {
   try {
-    const Id = req.doctor.id
-    await DoctorModel.findOne({_id:Id}).then((data)=>{
-      const result = data.slots
-      console.log(result)
+    const Id = req.doctor.id;
+    await DoctorModel.findOne({ _id: Id }).then((data) => {
+      const result = data.slots;
+      console.log(result);
       res.status(200).send({
-        success:true,result
-      })
-    })
+        success: true,
+        result,
+      });
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
-      success:false,message:`get slot controller ${error.message}`
-    })
+      success: false,
+      message: `get slot controller ${error.message}`,
+    });
   }
-}
+};
 
 module.exports = {
   DoctorSignup,
   DoctorLogin,
   createSlot,
-  get_slot
+  get_slot,
 };
