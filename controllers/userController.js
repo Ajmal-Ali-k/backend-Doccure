@@ -5,7 +5,7 @@ var validator = require("validator");
 const jwt = require("jsonwebtoken");
 const doctorModel = require("../models/doctorModel");
 const DepartmentModel = require("../models/departmentModel");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const loginController = async (req, res) => {
   try {
@@ -334,33 +334,60 @@ const changePassword = async (req, res) => {
   }
 };
 
+const filterSlot = async (req, res) => {
+  try {
+    const { id, selectedDate } = req.body.data;
 
-const filterSlot = async (req,res)=>{
-
-  const {id,selectedDate} = req.body.data
-  console.log(id,selectedDate)
-  const doctorID = new mongoose.Types.ObjectId(id);
-  // const doctor = await doctorModel.findOne({_id:id})
-  // console.log(doctor)
-  const data = await doctorModel.aggregate([
-    
-      { $match: {_id:doctorID}},
-      {$project: {
-         slots: {
+    const doctorID = new mongoose.Types.ObjectId(id);
+    const data = await doctorModel.aggregate([
+      { $match: { _id: doctorID } },
+      {
+        $project: {
+          slots: {
             $filter: {
-               input: "$slots",
-               as: "slots",
-               cond: { $eq:[ "$$slots.date",selectedDate ]}
-            }
-         }
-      }
+              input: "$slots",
+              as: "slots",
+              cond: { $eq: ["$$slots.date", selectedDate] },
+            },
+          },
+        },
+      },
+    ]);
+    const slots = data[0].slots;
+    console.log(slots,"this is slot")
+    if (!slots) {
+      return res.status(200).send({
+        success: false,
+        message: `Slots not available in this date`,
+      });
     }
-   
+    res.status(200).send({
+      success: true,
+      slots,
+    });
+    console.log(slots);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `filter controller error`,
+    });
+  }
+};
 
-  ])
-  console.log(data[0].slots)
-  // console.log(data)
 
+const createBooking = async (req,res)=>{
+  try {
+    console.log(req.body,"this is the booking data")
+    const user = req.user.id
+    console.log(user)
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      success:false,
+      message:`booking controller error`
+    })
+  }
 }
 
 module.exports = {
@@ -373,5 +400,6 @@ module.exports = {
   updateProfile,
   getUserData,
   changePassword,
-  filterSlot
+  filterSlot,
+  createBooking
 };

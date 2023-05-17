@@ -61,7 +61,7 @@ const DoctorSignup = async (req, res) => {
           });
         }
         return res.status(200).send({
-          message: "doctor already exist",
+          message: "This email already exist",
           success: false,
         });
       }
