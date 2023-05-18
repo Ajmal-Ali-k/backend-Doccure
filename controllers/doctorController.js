@@ -145,12 +145,14 @@ const DoctorLogin = async (req, res) => {
           expiresIn: 60 * 60 * 24 * 3,
         }
       );
+      const doctorID = doctor._id
       const doctorName = doctor.name;
       res.status(200).send({
         message: "login success",
         success: true,
         doctorName,
         doctorToken,
+        doctorID
       });
     } else {
       return res

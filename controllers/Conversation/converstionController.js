@@ -1,5 +1,6 @@
 const Conversation = require("../../models/Converstion");
 const Doctor = require("../../models/doctorModel");
+const User = require("../../models/userModel")
 //new conversation
 
 const newConversation = async (req, res) => {
@@ -48,8 +49,11 @@ const getConversation = async (req, res) => {
 const getconversationuserDetails = async (req, res) => {
   try {
     console.log(req.query.userId, "thisis query user id");
-    const user = await Doctor.findById(req.query.userId)
-    console.log(user,"thisis the doctor detail")
+    const doctor = await Doctor.findById(req.query.userId)
+    const client = await User.findById(req.query.userId)
+
+    const user = doctor ? doctor : client
+
     res.status(200).send({
       success:true,
       user
