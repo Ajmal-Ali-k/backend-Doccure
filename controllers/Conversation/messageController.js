@@ -3,7 +3,7 @@ const messsages = require("../../models/Message");
 //add
 
 const new_message = async (req, res) => {
-  console.log(req.body);
+
   const { text } = req.body.message;
   if (text === null) {
     return res.status(200).send({
@@ -34,7 +34,7 @@ const get_message = async (req, res) => {
     const messages = await messsages.find({
       conversationId: req.params.conversationId,
     });
-    console.log(messages, "thisisi messages");
+
     res.status(200).send({
       messages,
       success: true,
