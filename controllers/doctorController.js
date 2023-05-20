@@ -5,6 +5,7 @@ const validator = require("validator");
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryConfig } = require("../utilities/cloudinary");
 const jwt = require("jsonwebtoken");
+const { ObjectId } = require("mongodb");
 
 const DoctorSignup = async (req, res) => {
   try {
@@ -145,14 +146,14 @@ const DoctorLogin = async (req, res) => {
           expiresIn: 60 * 60 * 24 * 3,
         }
       );
-      const doctorID = doctor._id
+      const doctorID = doctor._id;
       const doctorName = doctor.name;
       res.status(200).send({
         message: "login success",
         success: true,
         doctorName,
         doctorToken,
-        doctorID
+        doctorID,
       });
     } else {
       return res
@@ -172,7 +173,7 @@ const createSlot = async (req, res) => {
   try {
     const Id = req.doctor.id;
     const { data } = req.body;
-    console.log(data, "this is dateaaa");
+
     if (data) {
       await DoctorModel.findByIdAndUpdate(
         { _id: Id },
@@ -196,9 +197,10 @@ const createSlot = async (req, res) => {
 const get_slot = async (req, res) => {
   try {
     const Id = req.doctor.id;
+
     await DoctorModel.findOne({ _id: Id }).then((data) => {
       const result = data.slots;
-      console.log(result);
+
       res.status(200).send({
         success: true,
         result,
@@ -213,9 +215,103 @@ const get_slot = async (req, res) => {
   }
 };
 
+// Function to generate time slots within the doctor's working hours
+const generateTimeSlots = (start, end, duration) => {
+  const timeSlots = [];
+  const slotDuration = parseInt(duration);
+
+  const [hours, minutes] = start.split(":");
+  let currentTime = new Date();
+  currentTime.setHours(hours);
+  currentTime.setMinutes(minutes);
+
+  const [hrs, min] = end.split(":");
+  const ends = new Date();
+  ends.setHours(hrs);
+  ends.setMinutes(min);
+
+  while (currentTime < ends) {
+    const endTime = new Date(currentTime);
+    endTime.setMinutes(endTime.getMinutes() + slotDuration);
+
+    if (endTime <= ends) {
+      const objectId = new ObjectId();
+      timeSlots.push({
+        start: new Date(currentTime),
+        end: endTime,
+        booked: false,
+        objectId: objectId.toString(),
+      });
+    }
+
+    currentTime = endTime;
+  }
+
+  return timeSlots;
+};
+
+const slotCreation = async (req, res) => {
+  try {
+    console.log(req.body, "this isbody");
+    const { date, startTime, endTime, slotDuration } = req.body;
+    const Id = req.doctor.id;
+    // const isExist = await DoctorModel.findOne(
+
+    //   {
+    //     slots: {
+    //       $elemMatch: {
+    //         $and: [
+    //           { date: date },
+    //           { startTime: "05:30:57.278Z" },
+    //           { endTime: "06:00:57.278Z" },
+    //         ],
+    //       },
+    //     },
+    //   }
+    // );
+    // console.log(isExist,"thsi is is exist")
+    if(isExist){
+      return res.status(200).send({
+        success:false,
+        message:"This time already exists" 
+
+      })
+    }
+
+    const timeSlots = generateTimeSlots(startTime, endTime, slotDuration);
+    console.log(timeSlots);
+    const doctor = await DoctorModel.updateOne(
+      { _id: Id },
+      {
+        $push: {
+          slots: {
+            date,
+            startTime,
+            endTime,
+            slotDuration,
+            timeSlots,
+          },
+        },
+      }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "slot created successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `slotCeation controller ${error}`,
+    });
+  }
+};
+
 module.exports = {
   DoctorSignup,
   DoctorLogin,
   createSlot,
   get_slot,
+  slotCreation,
 };
