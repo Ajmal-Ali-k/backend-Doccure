@@ -170,30 +170,30 @@ const DoctorLogin = async (req, res) => {
   }
 };
 
-const createSlot = async (req, res) => {
-  try {
-    const Id = req.doctor.id;
-    const { data } = req.body;
+// const createSlot = async (req, res) => {
+//   try {
+//     const Id = req.doctor.id;
+//     const { data } = req.body;
 
-    if (data) {
-      await DoctorModel.findByIdAndUpdate(
-        { _id: Id },
-        { $push: { slots: data } }
-      );
-      return res.status(200).send({
-        success: true,
-        message: "Slot added Succesfully",
-      });
-    }
-    console.log("slot added");
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      success: false,
-      message: `create Slot controller ${error.message}`,
-    });
-  }
-};
+//     if (data) {
+//       await DoctorModel.findByIdAndUpdate(
+//         { _id: Id },
+//         { $push: { slots: data } }
+//       );
+//       return res.status(200).send({
+//         success: true,
+//         message: "Slot added Succesfully",
+//       });
+//     }
+//     console.log("slot added");
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       success: false,
+//       message: `create Slot controller ${error.message}`,
+//     });
+//   }
+// };
 
 const get_slot = async (req, res) => {
   try {
@@ -326,7 +326,7 @@ const slotCreation = async (req, res) => {
 module.exports = {
   DoctorSignup,
   DoctorLogin,
-  createSlot,
+  // createSlot,
   get_slot,
   slotCreation,
 };
