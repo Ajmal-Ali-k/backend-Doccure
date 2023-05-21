@@ -6,6 +6,7 @@ const cloudinary = require("cloudinary").v2;
 const { CloudinaryConfig } = require("../utilities/cloudinary");
 const jwt = require("jsonwebtoken");
 const { ObjectId } = require("mongodb");
+const moment = require("moment");
 
 const DoctorSignup = async (req, res) => {
   try {
@@ -236,9 +237,12 @@ const generateTimeSlots = (start, end, duration) => {
 
     if (endTime <= ends) {
       const objectId = new ObjectId();
+      const endingTime = moment(endTime);
+      const staring = new Date(currentTime);
+      const startingTime = moment(staring);
       timeSlots.push({
-        start: new Date(currentTime),
-        end: endTime,
+        start: startingTime.format("HH:mm"),
+        end: endingTime.format("HH:mm"),
         booked: false,
         objectId: objectId.toString(),
       });
@@ -252,34 +256,45 @@ const generateTimeSlots = (start, end, duration) => {
 
 const slotCreation = async (req, res) => {
   try {
-    console.log(req.body, "this isbody");
-    const { date, startTime, endTime, slotDuration } = req.body;
+    const { date, startTime, endTime, slotDuration } = req.body.data;
     const Id = req.doctor.id;
-    // const isExist = await DoctorModel.findOne(
-
-    //   {
-    //     slots: {
-    //       $elemMatch: {
-    //         $and: [
-    //           { date: date },
-    //           { startTime: "05:30:57.278Z" },
-    //           { endTime: "06:00:57.278Z" },
-    //         ],
-    //       },
-    //     },
-    //   }
-    // );
-    // console.log(isExist,"thsi is is exist")
-    if(isExist){
+    const isExist = await DoctorModel.findOne({
+      _id: Id,
+      slots: {
+        $elemMatch: {
+          $and: [
+            { date: date },
+            { startTime: startTime },
+            { endTime: endTime },
+          ],
+        },
+      },
+    });
+    console.log(isExist, "thsi is is exist");
+    if (isExist) {
       return res.status(200).send({
-        success:false,
-        message:"This time already exists" 
-
-      })
+        success: false,
+        message: "This time already exists",
+      });
+    }
+    const already = await DoctorModel.findOne({
+      _id: Id,
+      slots: {
+        $elemMatch: {
+          $and: [{ date: date }],
+        },
+      },
+    });
+    console.log(already, "thsi is is exist");
+    if (already) {
+      return res.status(200).send({
+        success: false,
+        message: "This day time already Scheduled",
+      });
     }
 
     const timeSlots = generateTimeSlots(startTime, endTime, slotDuration);
-    console.log(timeSlots);
+
     const doctor = await DoctorModel.updateOne(
       { _id: Id },
       {

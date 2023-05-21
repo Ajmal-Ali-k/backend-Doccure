@@ -337,6 +337,7 @@ const changePassword = async (req, res) => {
 const filterSlot = async (req, res) => {
   try {
     const { id, selectedDate } = req.body.data;
+    console.log(req.body)
 
     const doctorID = new mongoose.Types.ObjectId(id);
     const data = await doctorModel.aggregate([
@@ -353,7 +354,7 @@ const filterSlot = async (req, res) => {
         },
       },
     ]);
-    const slots = data[0].slots;
+    const slots = data[0].slots[0]?.timeSlots;
     console.log(slots,"this is slot")
     if (!slots) {
       return res.status(200).send({
@@ -390,6 +391,40 @@ const createBooking = async (req,res)=>{
   }
 }
 
+
+
+const getSlots = async (req,res)=>{
+  try {
+    const { id,selectedDate} =req.body
+    const doctorID = new mongoose.Types.ObjectId(id);
+    const data = await doctorModel.aggregate([
+      { $match: { _id: doctorID } },
+      {
+        $project: {
+          slots: {
+            $filter: {
+              input: "$slots",
+              as: "slots",
+              cond: { $eq: ["$$slots.date", selectedDate] },
+            },
+          },
+        },
+      },
+    ]);
+    const slots = data[0].slots;
+    console.log(slots,"this is slot")
+
+    
+    
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      success: false,
+      message: `getSlots  controller error`
+    })
+    
+  }
+}
 module.exports = {
   loginController,
   registerController,
