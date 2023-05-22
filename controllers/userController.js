@@ -5,6 +5,7 @@ var validator = require("validator");
 const jwt = require("jsonwebtoken");
 const doctorModel = require("../models/doctorModel");
 const DepartmentModel = require("../models/departmentModel");
+const AppoinmentModel = require("../models/appoinmentModel");
 const mongoose = require("mongoose");
 
 const loginController = async (req, res) => {
@@ -355,13 +356,14 @@ const filterSlot = async (req, res) => {
       },
     ]);
     const slots = data[0].slots[0]?.timeSlots;
-    console.log(slots,"this is slot")
-    if (!slots) {
-      return res.status(200).send({
-        success: false,
-        message: `Slots not available in this date`,
-      });
-    }
+    // console.log(slots,"this is slot")
+    // if (!slots) {
+    //   console.log("filterd  slots not found")
+    //   return res.status(200).send({
+    //     success: false,
+    //     message: `Slots not available in this date`,
+    //   });
+    // }
     res.status(200).send({
       success: true,
       slots,
@@ -379,9 +381,39 @@ const filterSlot = async (req, res) => {
 
 const createBooking = async (req,res)=>{
   try {
-    console.log(req.body,"this is the booking data")
+    const {slot,totalAmount,doctor,order_id,timing,date}= req.body
+    const {start,end}=timing
     const user = req.user.id
-    console.log(user)
+    if(slot && totalAmount &&doctor && order_id && timing && date)
+    {
+      await AppoinmentModel.create({
+        user:user,
+        doctor:doctor,
+        consultationFee:totalAmount,
+        date:date,
+        start:start,
+        end:end,
+        transactionId:order_id,
+        slotId:slot[0]
+      }).then( async (result) =>{
+        await doctorModel.updateOne(
+          { _id: doctor, "slots.timeSlots.objectId": slot[0] },
+          { $set: { "slots.$[outer].timeSlots.$[inner].booked": true } },
+          {
+            arrayFilters: [{ "outer._id": "6469cc487089cdea1b1bc353" }, { "inner.objectId": slot[0] }]
+          }
+
+        ).then( result =>{
+          console.log("update successfull")
+          res.status(200).send({success:true})
+        })
+        .catch(error => {
+          console.error("Update failed", error);
+          res.status(200).send({success:false})
+        });
+      })
+    }
+
   } catch (error) {
     console.log(error)
     res.status(500).send({

@@ -23,13 +23,19 @@ const appointmentSchema = new mongoose.Schema(
     date: {
       type: String,
     },
-
-    time: {
-      type: String,
+    start:{
+      type:String,
     },
-    token: {
-      type: Number,
+    end:{
+      type:String,
     },
+    transactionId: {
+      type:String,
+    },
+    slotId:{
+      type:String,
+    }
+  
   },
   { timestamps: true }
 );
