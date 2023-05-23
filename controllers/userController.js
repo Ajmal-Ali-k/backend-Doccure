@@ -399,6 +399,8 @@ const createBooking = async (req,res)=>{
         transactionId:order_id,
         slotId:slot[0]
       }).then( async (result) =>{
+        const appoinmentId = result._id
+        console.log(result,"thsi is the result id");
         await doctorModel.updateOne(
           { _id: doctor, "slots.timeSlots.objectId": slot[0] },
           { $set: { "slots.$[outer].timeSlots.$[inner].booked": true } },
@@ -407,8 +409,9 @@ const createBooking = async (req,res)=>{
           }
 
         ).then( result =>{
+          
           console.log("update successfull")
-          res.status(200).send({success:true})
+          res.status(200).send({success:true,appoinmentId})
         })
         .catch(error => {
           console.error("Update failed", error);
@@ -460,6 +463,36 @@ const getSlots = async (req,res)=>{
     
   }
 }
+
+
+
+const appoinmentdata = async (req, res) => {
+  try {
+    const {id} =req.params
+    console.log(id,'this is params id')
+    const data = await AppoinmentModel.findOne({_id:id})
+    .populate("doctor")
+    console.log(data)
+    if (data){
+      res.status(200).send({
+        success: true,
+        data
+      })
+    }else{
+      res.status(200).send({
+        success: false,
+        message:`some thing went wrong`
+      })
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      success: false,
+      message: `appoinmentdata error: ${error}`
+    })
+    
+  }
+}
 module.exports = {
   loginController,
   registerController,
@@ -471,5 +504,6 @@ module.exports = {
   getUserData,
   changePassword,
   filterSlot,
-  createBooking
+  createBooking,
+  appoinmentdata
 };
