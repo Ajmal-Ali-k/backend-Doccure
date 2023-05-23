@@ -351,11 +351,14 @@ const filterSlot = async (req, res) => {
               as: "slots",
               cond: { $eq: ["$$slots.date", selectedDate] },
             },
+        
           },
         },
       },
     ]);
     const slots = data[0].slots[0]?.timeSlots;
+    const DocumentId = data[0].slots[0]?._id
+    console.log(DocumentId,"thsi doc id")
     // console.log(slots,"this is slot")
     // if (!slots) {
     //   console.log("filterd  slots not found")
@@ -367,8 +370,8 @@ const filterSlot = async (req, res) => {
     res.status(200).send({
       success: true,
       slots,
+      DocumentId,
     });
-    console.log(slots);
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -381,10 +384,10 @@ const filterSlot = async (req, res) => {
 
 const createBooking = async (req,res)=>{
   try {
-    const {slot,totalAmount,doctor,order_id,timing,date}= req.body
+    const {slot,totalAmount,doctor,order_id,timing,date,documentId}= req.body
     const {start,end}=timing
     const user = req.user.id
-    if(slot && totalAmount &&doctor && order_id && timing && date)
+    if(slot && totalAmount &&doctor && order_id && timing && date && documentId)
     {
       await AppoinmentModel.create({
         user:user,
@@ -400,7 +403,7 @@ const createBooking = async (req,res)=>{
           { _id: doctor, "slots.timeSlots.objectId": slot[0] },
           { $set: { "slots.$[outer].timeSlots.$[inner].booked": true } },
           {
-            arrayFilters: [{ "outer._id": "6469cc487089cdea1b1bc353" }, { "inner.objectId": slot[0] }]
+            arrayFilters: [{ "outer._id":documentId }, { "inner.objectId": slot[0] }]
           }
 
         ).then( result =>{
