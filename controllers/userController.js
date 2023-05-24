@@ -471,7 +471,7 @@ const appoinmentdata = async (req, res) => {
     const {id} =req.params
     console.log(id,'this is params id')
     const data = await AppoinmentModel.findOne({_id:id})
-    .populate("doctor")
+    .populate("doctor").populate("user")
     console.log(data)
     if (data){
       res.status(200).send({

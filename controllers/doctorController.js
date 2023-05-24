@@ -7,6 +7,8 @@ const { CloudinaryConfig } = require("../utilities/cloudinary");
 const jwt = require("jsonwebtoken");
 const { ObjectId } = require("mongodb");
 const moment = require("moment");
+const mongoose = require("mongoose");
+const appoinmentModel = require("../models/appoinmentModel");
 
 const DoctorSignup = async (req, res) => {
   try {
@@ -323,10 +325,165 @@ const slotCreation = async (req, res) => {
   }
 };
 
+const docname = async (req, res) => {
+  try {
+    const Id = req.doctor.id;
+    const doctor = await DoctorModel.findOne({ _id: Id });
+
+    const docname = doctor?.name;
+    const docimg = doctor?.photo;
+    console.log(docname, docimg);
+    if (doctor) {
+      res.status(200).send({
+        success: true,
+        docname,
+        docimg,
+      });
+    } else {
+      res.status(200).send({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `docname controller ${error.message}`,
+    });
+  }
+};
+const changePassword = async (req, res) => {
+  try {
+    console.log(req.body);
+    const { oldPassword, newPassword, confirmPassword } = req.body.data;
+    const Id = req.doctor.id;
+    const doctor = await DoctorModel.findOne({ _id: Id });
+
+    if (newPassword !== confirmPassword) {
+      return res.status(200).send({
+        message: `Confirm Password not match`,
+
+        success: false,
+      });
+    }
+    if (!doctor) {
+      return res.status(200).send({
+        message: `doctor not found`,
+
+        success: false,
+      });
+    }
+    if (!validator.isStrongPassword(newPassword)) {
+      return res
+        .status(200)
+        .send({ message: "password not strong enough", success: false });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, doctor.password);
+    if (!isMatch) {
+      return res.status(401).send({
+        message: `invalid password`,
+      });
+    }
+    //hash and store new password
+    const newhashed = await bcrypt.hash(newPassword, 10);
+
+    await DoctorModel.updateOne(
+      { _id: Id },
+      { $set: { password: newhashed } }
+    ).then((result) => {
+      console.log("passeord changed");
+      res.status(200).send({
+        message: `password successfully updated`,
+        success: true,
+      });
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: `chnge password controller${error.message}`,
+    });
+  }
+};
+
+const getUpcomingAppoinments = async (req, res) => {
+  try {
+    const Id = req.doctor.id;
+
+    const doctorId = "644ca49b21aea5e3e9b978ed"; // Replace with the actual doctor's ID
+
+    const currentDate = new Date(); // Get the current date and time
+    currentDate.setDate(currentDate.getDate() + 1);
+    const data = await appoinmentModel.aggregate([
+      {
+        $match: {
+          doctor: new ObjectId(doctorId),
+          date: { $gte: currentDate.toISOString().slice(0, 10) },
+        },
+      },
+      {
+        $sort: { date: 1, start: 1 },
+      },
+    ]);
+    console.log(data);
+    res.status(200).send({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `getUpcomingAppoinments controller ${error.message}`,
+    });
+  }
+};
+
+
+const getTodayAppointments = async (req, res) => {
+  try {
+    const Id = req.doctor.id;
+
+    const doctorId = "644ca49b21aea5e3e9b978ed"; // Replace with the actual doctor's ID
+
+    const currentDate = new Date(); // Get the current date and time
+
+    const data = await appoinmentModel.aggregate([
+      {
+        $match: {
+          doctor: new ObjectId(doctorId),
+          date: currentDate.toISOString().slice(0, 10),
+        },
+      },
+      {
+        $sort: { date: 1, start: 1 },
+      },
+    ]);
+
+    console.log(data);
+
+    res.status(200).send({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `getTodayAppointments controller ${error.message}`,
+    });
+  }
+};
+
 module.exports = {
   DoctorSignup,
   DoctorLogin,
   // createSlot,
   get_slot,
   slotCreation,
+  docname,
+  changePassword,
+  getUpcomingAppoinments,
+  getTodayAppointments
 };
