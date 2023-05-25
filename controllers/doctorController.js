@@ -411,14 +411,14 @@ const getUpcomingAppoinments = async (req, res) => {
   try {
     const Id = req.doctor.id;
 
-    const doctorId = "644ca49b21aea5e3e9b978ed"; // Replace with the actual doctor's ID
+
 
     const currentDate = new Date(); // Get the current date and time
     currentDate.setDate(currentDate.getDate() + 1);
     const data = await appoinmentModel.aggregate([
       {
         $match: {
-          doctor: new ObjectId(doctorId),
+          doctor: new ObjectId(Id),
           date: { $gte: currentDate.toISOString().slice(0, 10) },
         },
       },
@@ -453,7 +453,7 @@ const getTodayAppointments = async (req, res) => {
   try {
     const Id = req.doctor.id;
 
-    const doctorId = "644ca49b21aea5e3e9b978ed"; // Replace with the actual doctor's ID
+
 
     const currentDate = new Date(); // Get the current date and time
     const options = { timeZone: 'Asia/Kolkata' };
@@ -463,15 +463,7 @@ const currentISTTime = currentDate.toLocaleString('en-IN', options);
       {
         $match: {
           doctor: new ObjectId(doctorId),
-          date: currentISTTime.toISOString().slice(0, 10),
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "user",
-          foreignField: "_id",
-          as: "user",
+          date: currentDate.toISOString().slice(0, 10),
         },
       },
       {
