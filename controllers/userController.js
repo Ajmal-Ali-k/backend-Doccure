@@ -10,8 +10,9 @@ const mongoose = require("mongoose");
 
 const loginController = async (req, res) => {
   try {
-    console.log("hiiiiiiiiiiiii guys");
+
     const { email, password } = req.body;
+    console.log(req.body);
     if (email && password) {
       const user = await userModel.findOne({ email });
 
@@ -38,7 +39,7 @@ const loginController = async (req, res) => {
           expiresIn: 60 * 60 * 24 * 3,
         }
       );
-      console.log(user, "this is the user");
+
       const clientName = user.username;
       const clientId = user._id;
       res.status(200).send({
