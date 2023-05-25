@@ -423,6 +423,14 @@ const getUpcomingAppoinments = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
         $sort: { date: 1, start: 1 },
       },
     ]);
@@ -448,12 +456,22 @@ const getTodayAppointments = async (req, res) => {
     const doctorId = "644ca49b21aea5e3e9b978ed"; // Replace with the actual doctor's ID
 
     const currentDate = new Date(); // Get the current date and time
+    const options = { timeZone: 'Asia/Kolkata' };
+const currentISTTime = currentDate.toLocaleString('en-IN', options);
 
     const data = await appoinmentModel.aggregate([
       {
         $match: {
           doctor: new ObjectId(doctorId),
-          date: currentDate.toISOString().slice(0, 10),
+          date: currentISTTime.toISOString().slice(0, 10),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
         },
       },
       {
@@ -476,6 +494,94 @@ const getTodayAppointments = async (req, res) => {
   }
 };
 
+
+const getTotalPatients = async (req, res) => {
+  try {
+    const doctorId = "644ca49b21aea5e3e9b978ed"; // Replace with the actual doctor's ID
+
+    const currentDate = new Date(); // Get the current date and time
+
+    const totalPatients = await appoinmentModel.aggregate([
+      {
+        $match: {
+          doctor: new ObjectId(doctorId),
+          date: { $lte: currentDate.toISOString().slice(0, 10) },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+        },
+      },
+    ]);
+
+    console.log(totalPatients);
+
+    res.status(200).send({
+      success: true,
+      totalPatients: totalPatients[0]?.total || 0,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `getTotalPatients controller ${error.message}`,
+    });
+  }
+};
+
+
+const getTotalAppointments = async (req, res) => {
+  try {
+    const doctorId = "644ca49b21aea5e3e9b978ed"; // Replace with the actual doctor's ID
+
+    const currentDate = new Date(); // Get the current date and time
+    currentDate.setDate(currentDate.getDate() - 1); // Exclude yesterday
+
+    const totalAppointments = await appoinmentModel.aggregate([
+      {
+        $match: {
+          doctor: new ObjectId(doctorId),
+          status: "pending",
+          date: { $gt: currentDate.toISOString().slice(0, 10) },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalPending: { $sum: 1 },
+          total: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalPending: 1,
+          total: 1,
+        },
+      },
+    ]);
+
+    console.log(totalAppointments);
+
+    res.status(200).send({
+      success: true,
+      totalAppointments: totalAppointments[0] || {
+        totalPending: 0,
+        total: 0,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `getTotalAppointments controller ${error.message}`,
+    });
+  }
+};
+
+
 module.exports = {
   DoctorSignup,
   DoctorLogin,
@@ -485,5 +591,7 @@ module.exports = {
   docname,
   changePassword,
   getUpcomingAppoinments,
-  getTodayAppointments
+  getTodayAppointments,
+  getTotalPatients,
+  getTotalAppointments
 };
