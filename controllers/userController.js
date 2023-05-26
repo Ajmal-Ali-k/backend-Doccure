@@ -10,7 +10,6 @@ const mongoose = require("mongoose");
 
 const loginController = async (req, res) => {
   try {
-
     const { email, password } = req.body;
     console.log(req.body);
     if (email && password) {
@@ -339,7 +338,7 @@ const changePassword = async (req, res) => {
 const filterSlot = async (req, res) => {
   try {
     const { id, selectedDate } = req.body.data;
-    console.log(req.body)
+    console.log(req.body);
 
     const doctorID = new mongoose.Types.ObjectId(id);
     const data = await doctorModel.aggregate([
@@ -352,14 +351,13 @@ const filterSlot = async (req, res) => {
               as: "slots",
               cond: { $eq: ["$$slots.date", selectedDate] },
             },
-        
           },
         },
       },
     ]);
     const slots = data[0].slots[0]?.timeSlots;
-    const DocumentId = data[0].slots[0]?._id
-    console.log(DocumentId,"thsi doc id")
+    const DocumentId = data[0].slots[0]?._id;
+    console.log(DocumentId, "thsi doc id");
     // console.log(slots,"this is slot")
     // if (!slots) {
     //   console.log("filterd  slots not found")
@@ -382,59 +380,66 @@ const filterSlot = async (req, res) => {
   }
 };
 
-
-const createBooking = async (req,res)=>{
+const createBooking = async (req, res) => {
   try {
-    const {slot,totalAmount,doctor,order_id,timing,date,documentId}= req.body
-    const {start,end}=timing
-    const user = req.user.id
-    if(slot && totalAmount &&doctor && order_id && timing && date && documentId)
-    {
+    const { slot, totalAmount, doctor, order_id, timing, date, documentId } =
+      req.body;
+    const { start, end } = timing;
+    const user = req.user.id;
+    if (
+      slot &&
+      totalAmount &&
+      doctor &&
+      order_id &&
+      timing &&
+      date &&
+      documentId
+    ) {
       await AppoinmentModel.create({
-        user:user,
-        doctor:doctor,
-        consultationFee:totalAmount,
-        date:date,
-        start:start,
-        end:end,
-        transactionId:order_id,
-        slotId:slot[0]
-      }).then( async (result) =>{
-        const appoinmentId = result._id
-        console.log(result,"thsi is the result id");
-        await doctorModel.updateOne(
-          { _id: doctor, "slots.timeSlots.objectId": slot[0] },
-          { $set: { "slots.$[outer].timeSlots.$[inner].booked": true } },
-          {
-            arrayFilters: [{ "outer._id":documentId }, { "inner.objectId": slot[0] }]
-          }
-
-        ).then( result =>{
-          
-          console.log("update successfull")
-          res.status(200).send({success:true,appoinmentId})
-        })
-        .catch(error => {
-          console.error("Update failed", error);
-          res.status(200).send({success:false})
-        });
-      })
+        user: user,
+        doctor: doctor,
+        consultationFee: totalAmount,
+        date: date,
+        start: start,
+        end: end,
+        transactionId: order_id,
+        slotId: slot[0],
+      }).then(async (result) => {
+        const appoinmentId = result._id;
+        console.log(result, "thsi is the result id");
+        await doctorModel
+          .updateOne(
+            { _id: doctor, "slots.timeSlots.objectId": slot[0] },
+            { $set: { "slots.$[outer].timeSlots.$[inner].booked": true } },
+            {
+              arrayFilters: [
+                { "outer._id": documentId },
+                { "inner.objectId": slot[0] },
+              ],
+            }
+          )
+          .then((result) => {
+            console.log("update successfull");
+            res.status(200).send({ success: true, appoinmentId });
+          })
+          .catch((error) => {
+            console.error("Update failed", error);
+            res.status(200).send({ success: false });
+          });
+      });
     }
-
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
-      success:false,
-      message:`booking controller error`
-    })
+      success: false,
+      message: `booking controller error`,
+    });
   }
-}
+};
 
-
-
-const getSlots = async (req,res)=>{
+const getSlots = async (req, res) => {
   try {
-    const { id,selectedDate} =req.body
+    const { id, selectedDate } = req.body;
     const doctorID = new mongoose.Types.ObjectId(id);
     const data = await doctorModel.aggregate([
       { $match: { _id: doctorID } },
@@ -451,49 +456,63 @@ const getSlots = async (req,res)=>{
       },
     ]);
     const slots = data[0].slots;
-    console.log(slots,"this is slot")
-
-    
-    
+    console.log(slots, "this is slot");
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
       success: false,
-      message: `getSlots  controller error`
-    })
-    
+      message: `getSlots  controller error`,
+    });
   }
-}
-
-
+};
 
 const appoinmentdata = async (req, res) => {
   try {
-    const {id} =req.params
-    console.log(id,'this is params id')
-    const data = await AppoinmentModel.findOne({_id:id})
-    .populate("doctor").populate("user")
-    console.log(data)
-    if (data){
+    const { id } = req.params;
+    console.log(id, "this is params id");
+    const data = await AppoinmentModel.findOne({ _id: id })
+      .populate("doctor")
+      .populate("user");
+    console.log(data);
+    if (data) {
       res.status(200).send({
         success: true,
-        data
-      })
-    }else{
+        data,
+      });
+    } else {
       res.status(200).send({
         success: false,
-        message:`some thing went wrong`
-      })
+        message: `some thing went wrong`,
+      });
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
       success: false,
-      message: `appoinmentdata error: ${error}`
-    })
-    
+      message: `appoinmentdata error: ${error}`,
+    });
   }
-}
+};
+
+const appoinments = async (req, res) => {
+  try {
+    const Id = req.user.id;
+    const appointments = await AppoinmentModel.find({ user: Id }).populate(
+      "doctor"
+    );
+
+    res.status(200).send({
+      success: true,
+      appointments,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `appoinments error: ${error}`,
+    });
+  }
+};
 module.exports = {
   loginController,
   registerController,
@@ -506,5 +525,6 @@ module.exports = {
   changePassword,
   filterSlot,
   createBooking,
-  appoinmentdata
+  appoinmentdata,
+  appoinments
 };

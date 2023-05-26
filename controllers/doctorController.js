@@ -410,9 +410,6 @@ const changePassword = async (req, res) => {
 const getUpcomingAppoinments = async (req, res) => {
   try {
     const Id = req.doctor.id;
-
-
-
     const currentDate = new Date(); // Get the current date and time
     currentDate.setDate(currentDate.getDate() + 1);
     const data = await appoinmentModel.aggregate([
@@ -453,16 +450,14 @@ const getTodayAppointments = async (req, res) => {
   try {
     const Id = req.doctor.id;
 
-
-
-    const currentDate = new Date(); // Get the current date and time
+    const currentDate = new Date(); 
     const options = { timeZone: 'Asia/Kolkata' };
-const currentISTTime = currentDate.toLocaleString('en-IN', options);
+    const currentISTTime = currentDate.toLocaleString('en-IN', options);
 
     const data = await appoinmentModel.aggregate([
       {
         $match: {
-          doctor: new ObjectId(doctorId),
+          doctor: new ObjectId(Id),
           date: currentDate.toISOString().slice(0, 10),
         },
       },
@@ -526,17 +521,17 @@ const getTotalPatients = async (req, res) => {
 
 const getTotalAppointments = async (req, res) => {
   try {
-    const doctorId = "644ca49b21aea5e3e9b978ed"; // Replace with the actual doctor's ID
+    const doctorId = req.doctor.id; // Replace with the actual doctor's ID
 
     const currentDate = new Date(); // Get the current date and time
-    currentDate.setDate(currentDate.getDate() - 1); // Exclude yesterday
+    const today = currentDate.toISOString().slice(0, 10);
 
     const totalAppointments = await appoinmentModel.aggregate([
       {
         $match: {
           doctor: new ObjectId(doctorId),
           status: "pending",
-          date: { $gt: currentDate.toISOString().slice(0, 10) },
+          date: { $ne: today, $gt: today },
         },
       },
       {
@@ -572,6 +567,7 @@ const getTotalAppointments = async (req, res) => {
     });
   }
 };
+
 
 
 module.exports = {
