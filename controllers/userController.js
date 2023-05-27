@@ -501,7 +501,7 @@ const appoinments = async (req, res) => {
     const Id = req.user.id;
     const appointments = await AppoinmentModel.find({ user: Id }).populate(
       "doctor"
-    );
+    ).sort({date:-1});
 
     res.status(200).send({
       success: true,

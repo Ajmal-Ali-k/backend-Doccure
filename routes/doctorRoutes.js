@@ -1,5 +1,5 @@
 const express = require('express');
-const { DoctorSignup, DoctorLogin, createSlot, get_slot, slotCreation, docname, changePassword, getUpcomingAppoinments, getTodayAppointments, getTotalPatients, getTotalAppointments } = require('../controllers/doctorController');
+const { DoctorSignup, DoctorLogin, createSlot, get_slot, slotCreation, docname, changePassword, getUpcomingAppoinments, getTodayAppointments, getTotalPatients, getTotalAppointments, acceptAppoinment, cancelAppoinment } = require('../controllers/doctorController');
 const {doctorVerify}=require('../middleware/authentication');
 
 
@@ -18,6 +18,8 @@ router.get('/upcomingAppoinments',doctorVerify,getUpcomingAppoinments)
 router.get('/todayAppoinments',doctorVerify,getTodayAppointments)
 router.get('/totalpatients',doctorVerify,getTotalPatients)
 router.get('/totalAppoiments',doctorVerify,getTotalAppointments)
+router.put("/accept_appoinment",acceptAppoinment)
+router.put('/cancel_appoinment',cancelAppoinment)
 
 
 

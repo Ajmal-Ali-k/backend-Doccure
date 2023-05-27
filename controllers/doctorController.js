@@ -9,6 +9,7 @@ const { ObjectId } = require("mongodb");
 const moment = require("moment");
 const mongoose = require("mongoose");
 const appoinmentModel = require("../models/appoinmentModel");
+const userModel = require("../models/userModel")
 
 const DoctorSignup = async (req, res) => {
   try {
@@ -576,6 +577,62 @@ const getTotalAppointments = async (req, res) => {
   }
 };
 
+const acceptAppoinment = async (req,res)=>{
+  try {
+    const {id} = req.query
+    const appoinment = await appoinmentModel.findOneAndUpdate({_id:id},
+      {$set:{status:"confirmed"}}, { new: true });
+
+      if(!appoinment){
+        return res.status(200).send({
+          success:false,
+          message: 'Appointment not found.',
+        })
+      }
+      res.status(200).send({success:true, message:"Accepted Successfully"})
+
+
+   
+
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success:false,
+      message:`Accept appoinment ${error}`,
+    })
+  }
+}
+
+
+const cancelAppoinment = async (req,res)=>{
+  try {
+    const {id} = req.query
+    const appoinment = await appoinmentModel.findOneAndUpdate({_id:id},
+      {$set:{status:"cancelled"}}, { new: true });
+
+      if(!appoinment){
+        return res.status(200).send({
+          success:false,
+          message: 'Appointment not found.',
+        })
+      }
+    const refundAmount = appoinment.consultationFee ;
+
+    const userId = (appoinment.user).toString();
+    // Update the user's wallet with the refunded amount
+    await userModel.updateOne({ _id: userId }, { $inc: { wallet: refundAmount } }).then((result)=>{
+      res.status(200).send({success:true, message:"cancelled successfully"})
+    })
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success:false,
+      message:`cancel appoinment ${error}`,
+    })
+  }
+}
 
 
 module.exports = {
@@ -589,5 +646,8 @@ module.exports = {
   getUpcomingAppoinments,
   getTodayAppointments,
   getTotalPatients,
-  getTotalAppointments
+  getTotalAppointments,
+  acceptAppoinment,
+  cancelAppoinment
+
 };
