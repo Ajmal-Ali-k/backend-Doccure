@@ -9,8 +9,10 @@ const doctorRoutes = require("./routes/doctorRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const conversationRoutes = require("./routes/conversationRoute");
 const messageRoutes = require("./routes/messagesRoute");
+const http = require('http')
 const cors = require("cors");
 const { Server } = require("socket.io");
+const socketConnections = require('./soketIo')
 
 dotenv.config();
 //rest object
@@ -35,55 +37,61 @@ app.use("/", userRoutes);
 
 //listen port
 const port = process.env.PORT;
+// const server = http.createServer(app)
 
 const server = app.listen(port, () => {
   console.log(`server running at port ${port}`.bgCyan.white);
 });
 
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3000",
-  },
-});
+socketConnections(server)
 
-let users = [];
-const addUser = (userId, socketId) => {
-  !users.some((user) => user.userId === userId) &&
-    users.push({ userId, socketId });
-};
-const removeUser = (socketId) => {
-  users = users.filter((user) => user.socketId !== socketId);
-};
-const getUser = (userId) => {
-  return users.find((user) => user.userId === userId);
-};
 
-io.on("connection", (socket) => {
-  //when connect
 
-  console.log("Socket server connected".bgMagenta.white);
+// const io = new Server(server, {
+//   cors: {
+//     origin: "http://localhost:3000",
+//     methods:["GET","POST"]
+//   },
+// });
 
-  //take userid and socket id from user
+// let users = [];
+// const addUser = (userId, socketId) => {
+//   !users.some((user) => user.userId === userId) &&
+//     users.push({ userId, socketId });
+// };
+// const removeUser = (socketId) => {
+//   users = users.filter((user) => user.socketId !== socketId);
+// };
+// const getUser = (userId) => {
+//   return users.find((user) => user.userId === userId);
+// };
 
-  socket.on("addUser", (userId) => {
-    addUser(userId, socket.id);
-    io.emit("getUser", users);
-  });
+// io.on("connection", (socket) => {
+//   //when connect
 
-  //send and get message
-  socket.on("sendMessage", ({senderId,recieverId,text}) => {
-    const user = getUser(recieverId);
-    io.to(user?.socketId).emit("getMessage", {
-      senderId,
-      text,
-    });
-  });
+//   console.log("Socket server connected".bgMagenta.white);
 
-  //when disconnect
+//   //take userid and socket id from user
 
-  socket.on("disconnect", () => {
-    console.log("a user disconnected".bgRed.white);
-    removeUser(socket.id);
-    io.emit("getUser", users);
-  });
-});
+//   socket.on("addUser", (userId) => {
+//     addUser(userId, socket.id);
+//     io.emit("getUser", users);
+//   });
+
+//   //send and get message
+//   socket.on("sendMessage", ({senderId,recieverId,text}) => {
+//     const user = getUser(recieverId);
+//     io.to(user?.socketId).emit("getMessage", {
+//       senderId,
+//       text,
+//     });
+//   });
+
+//   //when disconnect
+
+//   socket.on("disconnect", () => {
+//     console.log("a user disconnected".bgRed.white);
+//     removeUser(socket.id);
+//     io.emit("getUser", users);
+//   });
+// });
