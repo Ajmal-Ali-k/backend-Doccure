@@ -265,9 +265,11 @@ const getUserData = async (req, res) => {
     const Id = req.user.id;
     const user = await userModel.findOne({ _id: Id });
     if (user) {
+      const balence = user.wallet;
       return res.status(200).send({
         success: true,
         user,
+        balence
       });
     } else {
       return res.status(500).send({
@@ -513,6 +515,38 @@ const appoinments = async (req, res) => {
     });
   }
 };
+
+
+const cancelAppoinment = async (req,res)=>{
+  try {
+    const {id} = req.query
+    const appoinment = await AppoinmentModel.findOneAndUpdate({_id:id},
+      {$set:{status:"cancelled"}}, { new: true });
+
+      if(!appoinment){
+        return res.status(200).send({
+          success:false,
+          message: 'Appointment not found.',
+        })
+      }
+    const refundAmount = appoinment.consultationFee * 0.5;
+
+    const userId = (appoinment.user).toString();
+    // Update the user's wallet with the refunded amount
+    await userModel.updateOne({ _id: userId }, { $inc: { wallet: refundAmount } }).then((result)=>{
+      res.status(200).send({success:true, message:"cancelled successfully"})
+    })
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success:false,
+      message:`cancel appoinment ${error}`,
+    })
+  }
+}
+
+
 module.exports = {
   loginController,
   registerController,
@@ -526,5 +560,6 @@ module.exports = {
   filterSlot,
   createBooking,
   appoinmentdata,
-  appoinments
+  appoinments,
+  cancelAppoinment
 };

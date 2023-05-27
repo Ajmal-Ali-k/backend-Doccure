@@ -462,6 +462,14 @@ const getTodayAppointments = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
         $sort: { date: 1, start: 1 },
       },
     ]);
