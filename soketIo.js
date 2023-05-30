@@ -73,7 +73,6 @@ function socketConnections(server) {
     const socketIdEmailMap = new Map();
 
     socket.on("room:join",(data)=>{
-      console.log(data)
     const {email,room}=data
     emailToSocketIdMap.set(email,socket.id);
     socketIdEmailMap.set(socket.id,email)
