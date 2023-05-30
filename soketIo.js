@@ -9,23 +9,28 @@ function socketConnections(server) {
       methods: ["GET", "POST"],
     },
   });
-  let users = [];
-  const addUser = (userId, socketId) => {
-    !users.some((user) => user.userId === userId) &&
-      users.push({ userId, socketId });
-  };
-  const removeUser = (socketId) => {
-    users = users.filter((user) => user.socketId !== socketId);
-  };
-  const getUser = (userId) => {
-    return users.find((user) => user.userId === userId);
-  };
+  
+
+  // this is from chat
+  // let users = [];
+  // const addUser = (userId, socketId) => {
+  //   !users.some((user) => user.userId === userId) &&
+  //     users.push({ userId, socketId });
+  // };
+  // const removeUser = (socketId) => {
+  //   users = users.filter((user) => user.socketId !== socketId);
+  // };
+  // const getUser = (userId) => {
+  //   return users.find((user) => user.userId === userId);
+  // };
 
   io.on("connection", (socket) => {
     //when connect
 
-    console.log("Socket server connected".bgMagenta.white);
+    console.log(`Socket server connected,${socket.id}`.bgWhite.white);
 
+
+    //thsi sis traversy meadia
     //take userid and socket id from user
 
     // socket.on("addUser", (userId) => {
@@ -51,16 +56,31 @@ function socketConnections(server) {
     // });
 
     //   video call #########################
-    socket.emit('me',socket.id)
-    socket.on('disconnect', () =>{
-        socket.broadcast.emit("callended")
-    })
-    socket.on('calluser',({userToCall,signalData,from,name})=>{
-        io.to(userToCall).emit("calluser",{signal:signalData,from,name})
+    // socket.emit('me',socket.id)
+    // socket.on('disconnect', () =>{
+    //     socket.broadcast.emit("callended")
+    // })
+    // socket.on('calluser',({userToCall,signalData,from,name})=>{
+    //     io.to(userToCall).emit("calluser",{signal:signalData,from,name})
 
-    })
-    socket.on("answerCall",(data)=>{
-        io.to(data.to).emit("callaccepted",data.signal)
+    // })
+    // socket.on("answerCall",(data)=>{
+    //     io.to(data.to).emit("callaccepted",data.signal)
+    // })
+
+    /***********video call***************/
+    const emailToSocketIdMap = new Map();
+    const socketIdEmailMap = new Map();
+
+    socket.on("room:join",(data)=>{
+      console.log(data)
+    const {email,room}=data
+    emailToSocketIdMap.set(email,socket.id);
+    socketIdEmailMap.set(socket.id,email)
+    io.to(socket.id).emit('room:join',data)
+
+
+
     })
   });
 }
