@@ -76,6 +76,8 @@ function socketConnections(server) {
     const {email,room}=data
     emailToSocketIdMap.set(email,socket.id);
     socketIdEmailMap.set(socket.id,email)
+    io.to(room).emit('user:joined',{email,id:socket.id})
+    socket.join(room)
     io.to(socket.id).emit('room:join',data)
 
 
