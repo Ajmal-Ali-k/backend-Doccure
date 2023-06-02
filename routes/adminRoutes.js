@@ -1,5 +1,5 @@
 const express = require('express');
-const { getPendingDoctors, adminLogin, approveDocter, rejectDocter, addDepartment, getDepartments, newDoctorDetails, deleteDepartment, userList, doctorList, blockUser, UnblockUser, blockDoctor, UnblockDoctor, dashData,  } = require('../controllers/adminController');
+const { getPendingDoctors, adminLogin, approveDocter, rejectDocter, addDepartment, getDepartments, newDoctorDetails, deleteDepartment, userList, doctorList, blockUser, UnblockUser, blockDoctor, UnblockDoctor, dashData, barGraph, pieGraph,  } = require('../controllers/adminController');
 
 const { adminVerify } = require('../middleware/authentication');
 
@@ -25,4 +25,7 @@ router.patch('/unblock_user',adminVerify,UnblockUser)
 router.patch('/block_doctor',adminVerify,blockDoctor)
 router.patch('/unBlock_doctor',adminVerify,UnblockDoctor)
 router.get('/dashboard',adminVerify,dashData)
+router.get('/bargraph',adminVerify,barGraph)
+router.get('/pieChart',adminVerify,pieGraph)
+
 module.exports = router

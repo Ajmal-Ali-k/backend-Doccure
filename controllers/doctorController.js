@@ -432,7 +432,7 @@ const getUpcomingAppoinments = async (req, res) => {
         $sort: { date: 1, start: 1 },
       },
     ]);
-    console.log(data);
+
     res.status(200).send({
       success: true,
       data,
@@ -475,8 +475,8 @@ const getTodayAppointments = async (req, res) => {
       },
     ]);
 
-    console.log(data);
-
+ 
+    console.log(data)
     res.status(200).send({
       success: true,
       data,
@@ -590,10 +590,6 @@ const acceptAppoinment = async (req,res)=>{
         })
       }
       res.status(200).send({success:true, message:"Accepted Successfully"})
-
-
-   
-
     
   } catch (error) {
     console.log(error);
@@ -616,6 +612,7 @@ const cancelAppoinment = async (req,res)=>{
           success:false,
           message: 'Appointment not found.',
         })
+
       }
     const refundAmount = appoinment.consultationFee ;
 
@@ -633,6 +630,73 @@ const cancelAppoinment = async (req,res)=>{
     })
   }
 }
+const CompeleteAppoinment = async (req,res)=>{
+  try {
+    const {id} = req.query
+    const appoinment = await appoinmentModel.findOneAndUpdate({_id:id},
+      {$set:{status:"compeleted"}}, { new: true });
+
+      if(!appoinment){
+        return res.status(200).send({
+          success:false,
+          message: 'Appointment not found.',
+        })
+      }
+      res.status(200).send({success:true, message:"Accepted Successfully"})
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success:false,
+      message:`Accept appoinment ${error}`,
+    })
+  }
+}
+
+
+
+
+///////////////////////////////////////////////
+
+
+const getPastAppointments = async (req, res) => {
+  try {
+    const Id = req.doctor.id;
+    const currentDate = new Date();
+
+    const data = await appoinmentModel
+      .find({
+        doctor: Id,
+        date: { $lt: currentDate.toISOString().slice(0, 10) },
+      })
+      .populate({
+        path: "user",
+        select: "_id username photo lastName",
+      })
+      .select("-createdAt -updatedAt -__v")
+      .sort({ date: -1, start: -1 });
+
+
+      const now = new Date();
+
+
+    res.status(200).send({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `getPastAppointments controller ${error.message}`,
+    });
+  }
+};
+
+
+
+
+
 
 
 module.exports = {
@@ -648,6 +712,8 @@ module.exports = {
   getTotalPatients,
   getTotalAppointments,
   acceptAppoinment,
-  cancelAppoinment
+  cancelAppoinment,
+  getPastAppointments,
+  CompeleteAppoinment
 
 };

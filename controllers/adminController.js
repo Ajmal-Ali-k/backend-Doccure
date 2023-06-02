@@ -404,6 +404,90 @@ const dashData = async (req, res) => {
   }
 };
 
+
+
+///
+//seles report
+const barGraph= async (req, res, next) => {
+  try {
+    // const { id } = req.user
+      let saleReport
+     saleReport = await appoinments.aggregate([
+          { $match:{
+            status:{$ne:"cancelled"}
+          }
+        },
+          {
+              $group: {
+                  _id: { $dateToString: { format: "%m", date: "$createdAt" } },
+                  totalPrice:{$sum:"$consultationFee"},
+                  count: { $sum: 1 },
+              },
+          }, { $sort: { _id: 1 } }
+      ])
+
+      const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+     saleReport = saleReport.map((el) => {
+        const newOne = { ...el };
+        let id = newOne._id.slice(0, 2)
+        if(id<10){
+         id = newOne._id.slice(1, 2)}
+        newOne._id = months[id-1]
+
+        return newOne;
+    })
+
+
+
+res.status(200).send({ saleReport: saleReport ,success:true })
+  }
+   catch(err){
+    res.status(500).send({ error: "Internal Server Error !" })
+   }
+}
+
+ const pieGraph= async (req, res, next) => {
+  try {
+ 
+      let saleReport
+     saleReport = await appoinments.aggregate([
+          { $match:
+            { status: { $in: ["cancelled","confirmed","compeleted","pending" ] } }
+       },
+          {
+            $group: {
+              _id:  "$status",
+              count: { $sum: 1 },
+          },
+          }, { $sort: { _id: 1 } }
+      ])
+    
+
+      console.log(saleReport)
+
+res.status(200).send({ saleReport: saleReport ,success:true})
+  }
+   catch(err){
+    console.log(err)
+    res.status(500).send({ error: "Internal Server Error !" })
+   }
+}
+
+
+
 module.exports = {
   getPendingDoctors,
   adminLogin,
@@ -420,4 +504,6 @@ module.exports = {
   blockDoctor,
   UnblockDoctor,
   dashData,
+  barGraph,
+  pieGraph
 };
