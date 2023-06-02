@@ -5,7 +5,7 @@ function socketConnections(server) {
   console.log("socket connection calling".bgYellow.white);
   const io = new Server(server, {
     cors: {
-      origin: "https://doccurefrontend.onrender.com",
+      origin: "https://main.d3asox4cw6fe34.amplifyapp.com",
       methods: ["GET", "POST"],
     },
   });
