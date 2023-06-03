@@ -475,8 +475,7 @@ const getTodayAppointments = async (req, res) => {
       },
     ]);
 
- 
-    console.log(data)
+
     res.status(200).send({
       success: true,
       data,

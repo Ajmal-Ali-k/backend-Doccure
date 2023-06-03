@@ -26,7 +26,7 @@ const newConversation = async (req, res) => {
 
 const getConversation = async (req, res) => {
   try {
-    console.log("hiiii");
+
     const userId = req.chat.id;
     // console.log(userId, "this is userid");
     const conversation = await Conversation.find({

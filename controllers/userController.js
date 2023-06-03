@@ -7,6 +7,7 @@ const doctorModel = require("../models/doctorModel");
 const DepartmentModel = require("../models/departmentModel");
 const AppoinmentModel = require("../models/appoinmentModel");
 const mongoose = require("mongoose");
+const {sendotp,varifyotp} =require('../helpers/otp')
 
 const loginController = async (req, res) => {
   try {
@@ -547,6 +548,77 @@ const cancelAppoinment = async (req,res)=>{
 }
 
 
+
+
+const forgotpost = async (req,res)=>{
+ 
+  console.log(req.query.email)
+  let findUser = await userModel.findOne({ email: req.query.email},{_id:0,number:1}).then((user)=>{
+    console.log(user,111  )
+    if(user){
+         sendotp(user.number);
+        res.status(200).send({mobile:user.number ,success:true})
+    }else{
+      res.send({response:"email not found",success:false});
+    }
+  })
+}
+
+const forgotOtpVerify = async (req, res) => {
+  try {
+    let {otp, mobile} = req.body;
+    console.log(otp, mobile);
+    await varifyotp(mobile, otp).then((response) => {
+      console.log("waiting for verification");
+      if(response){
+        console.log("verification approved");
+        res.status(200).send({success:true})
+      }else{
+        console.log("verification failed");
+        res.status(200).send({success:false})
+      }
+    })
+  } catch (error) {
+  console.log(error)    
+  }
+}
+const changePwod = async(req,res)=>{
+  try {
+    const {mobile, newPassword} = req.body;
+    console.log(req.body)
+    const user = await userModel.findOne({number : mobile });
+
+    if (!user) {
+      return res.status(200).send({
+        message: `user not found`,
+        success: false,
+      });
+    }
+    if (!validator.isStrongPassword(newPassword)) {
+      return res
+        .status(200)
+        .send({ message: "password not strong enough", success: false });
+    }
+    //hash and store new password
+    const newhashed = await bcrypt.hash(newPassword, 10);
+
+    await userModel
+      .updateOne({ number: mobile }, { $set: { password: newhashed } })
+      .then((result) => {
+        res.status(200).send({
+          message: `password successfully updated`,
+          success: true,
+        });
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: `chnge password controller${error.message}`,
+    });
+  }
+
+}
+
 module.exports = {
   loginController,
   registerController,
@@ -561,5 +633,9 @@ module.exports = {
   createBooking,
   appoinmentdata,
   appoinments,
-  cancelAppoinment
+  cancelAppoinment,
+  forgotpost,
+  forgotOtpVerify,
+  changePwod
+
 };
