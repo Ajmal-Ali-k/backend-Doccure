@@ -4,15 +4,33 @@ const User = require("../../models/userModel")
 //new conversation
 
 const newConversation = async (req, res) => {
-  const newchat = new Conversation({
-    members: [req.body.senderId, req.body.recieverId],
-  });
+
+  const {senderId,recieverId} =req.body
+
+
   try {
-    const savedConversation = await newchat.save();
-    res.status(200).send({
-      success: true,
-      savedConversation,
-    });
+    const  chatExist = await Conversation.findOne({
+      members:{$all:[senderId,recieverId]}
+    })
+   
+    if(chatExist){
+       console.log(`chatExist${chatExist}`)
+      return res.status(200).send({
+        success:true,
+        chatExist
+      })
+    }else{
+      const newchat = new Conversation({
+        members: [req.body.senderId, req.body.recieverId],
+      });
+      const savedConversation = await newchat.save();
+      console.log("chat created")
+      res.status(200).send({
+        success: true,
+        savedConversation,
+      });
+    }
+  
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -26,12 +44,13 @@ const newConversation = async (req, res) => {
 
 const getConversation = async (req, res) => {
   try {
-
+    console.log("conversation ")
     const userId = req.chat.id;
     // console.log(userId, "this is userid");
     const conversation = await Conversation.find({
       members: { $in: [userId] },
     });
+    // console.log(conversation,"this is the list")
     res.status(200).send({
       conversation,
       success: true,

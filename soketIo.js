@@ -6,6 +6,7 @@ function socketConnections(server) {
   const io = new Server(server, {
     cors: {
       origin: "https://main.d3asox4cw6fe34.amplifyapp.com",
+      // origin: "http://localhost:3000",
       methods: ["GET", "POST"],
     },
   });
@@ -30,7 +31,7 @@ function socketConnections(server) {
     console.log(`Socket server connected,${socket.id}`.bgWhite.white);
 
 
-    //thsi sis traversy meadia
+
     //take userid and socket id from user
 
     socket.on("addUser", (userId) => {
